@@ -20,6 +20,9 @@
     name: 'welcome',
     icon: 'smile',
     component: './Welcome',
+    layout: {
+      hideFooter: true
+    }
   },
   {
     path: '/admin',

@@ -6,19 +6,25 @@ import {
   UserOutlined,
   WeiboCircleOutlined,
 } from '@ant-design/icons';
-import { Alert, Space, message, Tabs } from 'antd';
-import React, { useState } from 'react';
-import ProForm, { ProFormCaptcha, ProFormCheckbox, ProFormText, ProFormTextArea, ProFormSelect } from '@ant-design/pro-form';
-import { useIntl, Link, history, FormattedMessage, SelectLang, useModel } from 'umi';
+import {Alert, Space, message, Tabs} from 'antd';
+import React, {useState} from 'react';
+import ProForm, {
+  ProFormCaptcha,
+  ProFormCheckbox,
+  ProFormText,
+  ProFormTextArea,
+  ProFormSelect
+} from '@ant-design/pro-form';
+import {useIntl, Link, history, FormattedMessage, SelectLang, useModel} from 'umi';
 import Footer from '@/components/Footer';
-import { login } from '@/services/ant-design-pro/api';
-import { getFakeCaptcha } from '@/services/ant-design-pro/login';
+import {login} from '@/services/ant-design-pro/api';
+import {getFakeCaptcha} from '@/services/ant-design-pro/login';
 
 import styles from './index.less';
 
 const LoginMessage: React.FC<{
   content: string;
-}> = ({ content }) => (
+}> = ({content}) => (
   <Alert
     style={{
       marginBottom: 24,
@@ -33,7 +39,8 @@ const Login: React.FC = () => {
   const [submitting, setSubmitting] = useState(false); // hooks submitting状态
   const [userLoginState, setUserLoginState] = useState<API.LoginResult>({}); // hooks设置登录组件用户obj
   const [type, setType] = useState<string>('account');
-  const { initialState, setInitialState } = useModel('@@initialState');
+  const {initialState, setInitialState} = useModel('@@initialState');
+  const [showCity, setShowCity] = useState(true);
 
   const intl = useIntl(); // 国际化
 
@@ -51,7 +58,7 @@ const Login: React.FC = () => {
     setSubmitting(true);
     try {
       // 登录
-      const msg = await login({ ...values, type });
+      const msg = await login({...values, type});
       if (msg.status === 'ok') {
         const defaultloginSuccessMessage = intl.formatMessage({
           id: 'pages.login.success',
@@ -61,8 +68,8 @@ const Login: React.FC = () => {
         await fetchUserInfo();
         /** 此方法会跳转到 redirect 参数所在的位置 */
         if (!history) return;
-        const { query } = history.location;
-        const { redirect } = query as { redirect: string };
+        const {query} = history.location;
+        const {redirect} = query as { redirect: string };
         history.push(redirect || '/');
         return;
       }
@@ -78,36 +85,45 @@ const Login: React.FC = () => {
     }
     setSubmitting(false);
   };
-  const { status, type: loginType } = userLoginState;
+  const {status, type: loginType} = userLoginState;
 
   return (
     <div className={styles.container}>
       <div className={styles.lang} data-lang>
-        {SelectLang && <SelectLang />}
+        {SelectLang && <SelectLang/>}
       </div>
       <div className={styles.content}>
         <div className={styles.top}>
           <div className={styles.header}>
             <Link to="/">
-              <img alt="logo" className={styles.logo} src="/logo.svg" />
+              <img alt="logo" className={styles.logo} src="/logo.svg"/>
               <span className={styles.title}>Ant Design New</span>
             </Link>
           </div>
           <div className={styles.desc}>
-            {intl.formatMessage({ id: 'pages.layouts.userLayout.title' })}
+            {intl.formatMessage({id: 'pages.layouts.userLayout.title'})}
           </div>
         </div>
 
         <div className={styles.main}>
           <ProForm
+            scrollToFirstError={true}
+            params={{}}
+            request={async () => {
+              return {
+                username: '蚂蚁设计有限公司',
+                autoLogin: false,
+                password: '123'
+              };
+            }}
             initialValues={{
-              autoLogin: false,
-              check: ['制造业', '互联网']
+              autoLogin: true,
+              check: ['制造业', '互联网', '农业']
             }}
             onValuesChange={(changeVal) => {
-              if (changeVal.text) {
-                console.log("ss:", changeVal)
-              }
+              if (changeVal.autoLogin) setShowCity(true)
+              else setShowCity(false)
+              console.log("ss:", changeVal)
             }}
             submitter={{
               searchConfig: {
@@ -158,11 +174,12 @@ const Login: React.FC = () => {
             {/* 账户密码登录 */}
             {type === 'account' && (
               <>
+                {showCity && <ProFormText/>}
                 <ProFormText
                   name="username"
                   fieldProps={{
                     size: 'large',
-                    prefix: <UserOutlined className={styles.prefixIcon} />,
+                    prefix: <UserOutlined className={styles.prefixIcon}/>,
                   }}
                   placeholder={intl.formatMessage({
                     id: 'pages.login.username.placeholder',
@@ -184,7 +201,7 @@ const Login: React.FC = () => {
                   name="password"
                   fieldProps={{
                     size: 'large',
-                    prefix: <LockOutlined className={styles.prefixIcon} />,
+                    prefix: <LockOutlined className={styles.prefixIcon}/>,
                   }}
                   placeholder={intl.formatMessage({
                     id: 'pages.login.password.placeholder',
@@ -203,33 +220,33 @@ const Login: React.FC = () => {
                   ]}
                 />
                 <ProFormTextArea name="text" placeholder="备注"/>
-                <ProFormCheckbox.Group name="check" layout="vertical" options={['农业', '制造业', '互联网']} />
+                <ProFormCheckbox.Group name="check" layout="vertical" options={['农业', '制造业', '互联网']}/>
                 <ProFormSelect name="select" valueEnum={{
                   open: '未解决',
                   closed: '已解决'
-                }} placeholder="please select" />
+                }} placeholder="please select"/>
                 <ProFormSelect
                   name="select2"
                   request={async () => [
-                    { label: '全部', value: 'all' },
-                    { label: '未解决', value: 'open' },
-                    { label: '已解决', value: 'closed' },
-                    { label: '解决中', value: 'processing' },
+                    {label: '全部', value: 'all'},
+                    {label: '未解决', value: 'open'},
+                    {label: '已解决', value: 'closed'},
+                    {label: '解决中', value: 'processing'},
                   ]}
                   placeholder="Please select a country"
-                  rules={[{ required: true, message: 'Please select your country!' }]}
+                  rules={[{required: true, message: 'Please select your country!'}]}
                 />
               </>
             )}
 
-            {status === 'error' && loginType === 'mobile' && <LoginMessage content="验证码错误" />}
+            {status === 'error' && loginType === 'mobile' && <LoginMessage content="验证码错误"/>}
             {/* 手机号登录 */}
             {type === 'mobile' && (
               <>
                 <ProFormText
                   fieldProps={{
                     size: 'large',
-                    prefix: <MobileOutlined className={styles.prefixIcon} />,
+                    prefix: <MobileOutlined className={styles.prefixIcon}/>,
                   }}
                   name="mobile"
                   placeholder={intl.formatMessage({
@@ -260,7 +277,7 @@ const Login: React.FC = () => {
                 <ProFormCaptcha
                   fieldProps={{
                     size: 'large',
-                    prefix: <LockOutlined className={styles.prefixIcon} />,
+                    prefix: <LockOutlined className={styles.prefixIcon}/>,
                   }}
                   captchaProps={{
                     size: 'large',
@@ -311,26 +328,26 @@ const Login: React.FC = () => {
               }}
             >
               <ProFormCheckbox noStyle name="autoLogin">
-                <FormattedMessage id="pages.login.rememberMe" defaultMessage="自动登录" />
+                <FormattedMessage id="pages.login.rememberMe" defaultMessage="自动登录"/>
               </ProFormCheckbox>
               <a
                 style={{
                   float: 'right',
                 }}
               >
-                <FormattedMessage id="pages.login.forgotPassword" defaultMessage="忘记密码" />
+                <FormattedMessage id="pages.login.forgotPassword" defaultMessage="忘记密码"/>
               </a>
             </div>
           </ProForm>
           <Space className={styles.other}>
-            <FormattedMessage id="pages.login.loginWith" defaultMessage="其他登录方式" />
-            <AlipayCircleOutlined className={styles.icon} />
-            <TaobaoCircleOutlined className={styles.icon} />
-            <WeiboCircleOutlined className={styles.icon} />
+            <FormattedMessage id="pages.login.loginWith" defaultMessage="其他登录方式"/>
+            <AlipayCircleOutlined className={styles.icon}/>
+            <TaobaoCircleOutlined className={styles.icon}/>
+            <WeiboCircleOutlined className={styles.icon}/>
           </Space>
         </div>
       </div>
-      <Footer />
+      <Footer/>
     </div>
   );
 };
